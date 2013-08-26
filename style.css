@@ -1,0 +1,39 @@
+html, body, .img-container {
+  padding: 0;
+  margin: 0;
+}
+body {
+  background: #333;
+}
+img {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  left: 0;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  width: 25%;
+  background: rgba(0, 0, 0, 0.4);
+  font-family: sans-serif;
+  color: #FFFFFF;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  font-size: 14px;
+}
+
+.sidebar h2 a {
+  color: #FFFFFF;
+  text-decoration: underline;
+}
+
+.sidebar h2 a:hover {
+  color: #C0C0C0;
+}
