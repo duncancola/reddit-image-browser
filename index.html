@@ -3,7 +3,7 @@
 <head>
 <link rel="stylesheet" href="style.css" type="text/css">
 <title>
-Earth Porn, Yo!
+Image scroller
 </title>
 </head>
 <body>
@@ -11,13 +11,19 @@ Earth Porn, Yo!
 <div class="sidebar">
   <h2 class="title"></h2>
   <h6 class="time"></h6>
-  <div class="appInfo">Index: <span class="index"></span><br />
-  Stack: <span class="stack"></span><br>
-  Speed: <span class="speed">5</span>s
+  <div class="appInfo">
+    Current Image #: <span class="index"></span><br />
+    Stack Size: <span class="stack"></span><br>
+    Auto-slideshow Images: <input type="checkbox" name="auto-slideshow"><br />
+    Speed: <span class="speed">5</span>s
   </div>
   <div class="stackSpeed">
     <input type="range" min="1" step="1" max="10">
   </div>
+  <button type="button" class="next">Next</button>
+</div>
+<div class="thumbnail-container">
+  <ul class="thumbnails"></ul>
 </div>
 <script src="bower_components/jquery/jquery.min.js"></script>
 <script src="bower_components/underscore/underscore-min.js"></script>

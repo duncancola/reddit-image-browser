@@ -5,39 +5,68 @@ var App = (function () {
       storedAfter,
       stackSpeed = 5000,
       imageSpeed = 5000,
+      transitionSpeed = 2000,
+      isAutoSlide = false,
+      maxStackSize = 100,
       stack = [];
 
   var showImages = function (r) {
     $container = $(".img-container");
+    $container.css("height", window.innerHeight);
     loadR(r, function (posts, after) {
       storedAfter = after;
       stack = stack.concat(posts);
-      next();
+      appendImages(posts);
+      $container.children("img").first().fadeIn(transitionSpeed);
+      // show first image
+      setSidebarMetadata(stack[index].data);
+      index++;
     });
-    events();
-    reload(r);
+    setupEvents();
+    buildStack(r);
   };
 
-  var events = function () {
-    document.querySelector(".stackSpeed input[type=range]").addEventListener("change", function (e) {
+  var appendImages = function (posts) {
+    _.each(posts, function (post) {
+      var $img = makeImage(post);
+      $img.appendTo($container);
+      var $thumb = $("<img>").attr("src", post.data.thumbnail);
+      var $li = $("<li>").append($thumb);
+      $(".thumbnails").append($li);
+    });
+  };
+
+  var setupEvents = function () {
+    // change auto-slideshow
+    $("input[type=checkbox][name=auto-slideshow]").change(function () {
+      isAutoSlide = $(this).is(":checked");
+      autoLoadImage();
+    });
+    //click next: goto next image
+    
+    // change speed of slideshow
+    $(".stackSpeed input[type=range]").on("change", function (e) {
       imageSpeed = parseInt(this.value, 10) * 1000;
       $(".appInfo").find(".speed").text(imageSpeed);
     });
+    // window resize, scale the height
+    $(window).resize(function () {
+      $container.css("height", window.innerHeight);
+    });
   };
 
-  var reload = function (r) {
+  var buildStack = function (r) {
     _.delay(function () {
       if (stack.length < index + 5) {
         loadR(r, function (posts, after) {
           storedAfter = after;
           stack = stack.concat(posts);
+          appendImages(posts);
           $(".sidebar").find(".appInfo").find(".index").text(index);
           $(".sidebar").find(".appInfo").find(".stack").text(stack.length);
-          //print(posts);
-          //print(stack);
         }, storedAfter);
       }
-      reload(r);
+      buildStack(r);
     }, stackSpeed);
   };
 
@@ -48,10 +77,25 @@ var App = (function () {
   };
 
   var makeImage = function (post) {
-    return $("<img>").attr("src", post.data.url + ".jpg").hide();
+    return $("<img>").attr("src", post.data.url + ".jpg").addClass("main").hide();
   };
 
-  var next = function () {
+  var gotoNextImage = function () {
+    var $prev = $container.find("img").first();
+    var $next = $prev.next();
+    var current = stack[index];
+    $prev.fadeOut(transitionSpeed, function () {
+      $(this).remove();
+      
+    });
+    $next.fadeIn(transitionSpeed);
+    setSidebarMetadata(current.data);
+    console.log("index=", index, "current", current, "stack:", stack);
+    index++;
+  };
+
+/* OLD
+  var gotoNextImage = function () {
     var $prev = $container.find("img");
     if ($prev.length > 0) {
       $prev.fadeOut("slow", function () {
@@ -61,20 +105,30 @@ var App = (function () {
     var current = stack[index];
     setSidebarMetadata(current.data);
     var $img = makeImage(current);
-    $img.appendTo($container).fadeIn("slow", function () {
-      _.delay(function () {
-        index++;
-        next();
-      }, imageSpeed);
-    });
+    $img.appendTo($container).fadeIn("slow", autoLoadImage);
+  };
+*/
+
+  var autoLoadImage = function () {
+    _.delay(function () {
+      if (isAutoSlide) {
+        console.log("autoLoadImage... ACTIVATE");
+        gotoNextImage();
+        autoLoadImage();
+      }
+    }, imageSpeed);
   };
 
   var setSidebarMetadata = function (img) {
+    console.log("image", index);
     var redditUrl = "http://www.reddit.com";
-    var $link = $("<a>").attr("href", redditUrl + img.permalink).text(img.title)
+    var $link = $("<a>").attr({
+      "href": redditUrl + img.permalink,
+      "target": "_blank"
+    }).text(img.title);
     $(".sidebar").find(".title").html("").append($link);
     $(".sidebar").find(".time").text(new Date(img.created_utc * 1000));
-    $(".sidebar").find(".appInfo").find(".index").text(index);
+    $(".sidebar").find(".appInfo").find(".index").text(index + 1);
     $(".sidebar").find(".appInfo").find(".stack").text(stack.length);
   };
 
